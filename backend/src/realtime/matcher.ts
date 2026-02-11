@@ -11,19 +11,30 @@ export interface MatchedVehicle {
   countdown: number;
 }
 
+const normalize = (value: string): string => value.trim().toLowerCase();
+
+function resolveDirection(dep: RealtimeDeparture): string {
+  return dep.towards || dep.direction;
+}
+
 export function matchRealtimeToTrips(
   departures: RealtimeDeparture[],
   activeTrips: ActiveTrip[]
 ): MatchedVehicle[] {
+  const availableTrips = [...activeTrips];
+
   return departures
     .map((dep) => {
-      const trip = activeTrips.find(
-        (candidate) =>
-          candidate.line === dep.line &&
-          candidate.direction.toLowerCase().includes(dep.towards.toLowerCase())
-      );
+      const realtimeDirection = normalize(resolveDirection(dep));
+      const tripIndex = availableTrips.findIndex((candidate) => {
+        if (candidate.line !== dep.line) return false;
+        if (!realtimeDirection) return true;
+        return normalize(candidate.direction).includes(realtimeDirection);
+      });
 
-      if (!trip) return null;
+      if (tripIndex === -1) return null;
+
+      const [trip] = availableTrips.splice(tripIndex, 1);
 
       const delaySeconds =
         dep.timeReal && dep.timePlanned
@@ -35,7 +46,7 @@ export function matchRealtimeToTrips(
       return {
         vehicleId: `${trip.tripId}-${dep.rbl}`,
         line: dep.line,
-        direction: dep.towards,
+        direction: resolveDirection(dep),
         nextStop: dep.stopName,
         delaySeconds,
         trip,

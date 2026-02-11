@@ -10,7 +10,7 @@ import { matchRealtimeToTrips } from './realtime/matcher.js';
 import { fetchRealtimeBatch, RealtimePoller } from './realtime/poller.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, '..', '..', 'data');
+const dataDir = path.join(__dirname, '..', 'data');
 
 async function main() {
   const app = express();
