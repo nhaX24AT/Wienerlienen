@@ -1,0 +1,17 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./backend/data:/app/data
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      - VITE_WS_URL=ws://localhost:4000/ws
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
